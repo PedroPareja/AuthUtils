@@ -1,0 +1,18 @@
+#!/usr/bin/perl
+
+use bytes;
+use Digest::SHA;
+use MIME::Base64;
+
+($pass, $salt) = @ARGV;
+
+unless (defined($salt)) {
+    print "Insufficient parameters", "\n", "Use: passgen <pass> <salt>", "\n";
+    exit 1;
+
+}
+
+$pass = Digest::SHA::sha1_base64($salt, $pass);
+
+print $pass, "\n";
+

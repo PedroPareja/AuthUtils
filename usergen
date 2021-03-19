@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+
+use bytes;
+use Digest::SHA;
+use MIME::Base64;
+use Math::BigInt;
+
+($path_to_file, $pass, $salt) = @ARGV;
+
+unless (defined($salt)) {
+    print "Insufficient parameters", "\n", "Use: usergen <path_to_userlist_file> <pass> <salt>", "\n";
+    exit 1;
+}
+
+my $handle;
+unless (open $handle, "<:encoding(utf8)", $path_to_file) {
+   print STDERR "Could not open file '$path_to_file': $!\n";
+   exit 2;
+}
+
+chomp(my @names = <$handle>);
+
+unless (close $handle) {
+   # what does it mean if close yields an error and you are just reading?
+   print STDERR "Error while closing '$path_to_file': $!\n";
+} 
+
+
+$names_size = scalar @names;
+
+$hash = Digest::SHA::sha1_hex($salt, $pass);
+$hash_num = Math::BigInt->from_hex($hash);
+$index = $hash_num->bmod($names_size);
+$index = $index->numify();
+$number = $hash_num->bmod(989)->numify() + 11;
+
+print $names[$index], $number, "\n";
+
